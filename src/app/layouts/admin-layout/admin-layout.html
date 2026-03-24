@@ -19,9 +19,11 @@
 
   <nav class="sidebar-nav">
     <div class="nav-label">Principal</div>
-    <a routerLink="/dashboard" routerLinkActive="active" class="sidebar-link" (click)="cerrarSidebar()">
-      <i class="bi bi-speedometer2"></i> Dashboard
-    </a>
+    @if (esAdmin) {
+      <a routerLink="/dashboard" routerLinkActive="active" class="sidebar-link" (click)="cerrarSidebar()">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a>
+    }
     <a routerLink="/productos" routerLinkActive="active" class="sidebar-link" (click)="cerrarSidebar()">
       <i class="bi bi-box-seam"></i> Productos
     </a>

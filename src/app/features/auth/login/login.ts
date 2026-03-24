@@ -25,7 +25,7 @@ export class LoginComponent {
     this.cargando.set(true);
     const dto: LoginRequest = { correo: this.correo(), contrasena: this.contrasena() };
     this.authSvc.login(dto).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => this.router.navigate([this.authSvc.esAdmin() ? '/dashboard' : '/productos']),
       error: err => {
         this.error.set(err.error?.mensaje ?? 'Credenciales inválidas.');
         this.cargando.set(false);

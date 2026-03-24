@@ -8,6 +8,6 @@ export const adminGuard: CanActivateFn = () => {
 
   if (auth.esAdmin()) return true;  // Solo ADMINISTRADOR
 
-  router.navigate(['/dashboard']);
+  router.navigate(['/productos']);
   return false;
 };

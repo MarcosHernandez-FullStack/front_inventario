@@ -13,7 +13,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./layouts/admin-layout/admin-layout').then(m => m.AdminLayoutComponent),
     children: [
-      { path: 'dashboard',  loadComponent: () => import('./features/dashboard/dashboard').then(m => m.DashboardComponent) },
+      { path: 'dashboard',  canActivate: [adminGuard], loadComponent: () => import('./features/dashboard/dashboard').then(m => m.DashboardComponent) },
       { path: 'productos',  loadComponent: () => import('./features/productos/lista-productos/lista-productos').then(m => m.ListaProductosComponent) },
       { path: 'reportes',   loadComponent: () => import('./features/reportes/reportes').then(m => m.ReportesComponent) },
       {

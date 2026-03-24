@@ -72,8 +72,7 @@
                   class="btn btn-sm"
                   style="font-size:0.72rem;font-weight:600;padding:0.25rem 0.7rem;border-radius:2rem"
                   [class]="u.estado === 'ACTIVO' ? 'badge-activo border-0' : 'badge-inactivo border-0'"
-                  title="Clic para cambiar estado"
-                >
+                  title="Clic para cambiar estado">
                   {{ u.estado }}
                 </button>
               </td>
@@ -110,113 +109,9 @@
           <h5 class="modal-title fw-bold">Nuevo usuario</h5>
           <button type="button" class="btn-close" (click)="modalAbierto.set(false)"></button>
         </div>
-        <div class="modal-body">
-          <div class="row g-3">
-            <!-- Nombres -->
-            <div class="col-6">
-              <label class="form-label">Nombres <span class="text-danger">*</span></label>
-              <input type="text"
-                [class]="'form-control' + (err('nombres') ? ' is-invalid' : '')"
-                placeholder="Juan" maxlength="100"
-                [ngModel]="form().nombres"
-                (ngModelChange)="patchForm('nombres', $event)"
-                (blur)="tocar('nombres')"
-                name="nombres" />
-              <div class="d-flex justify-content-between mt-1">
-                @if (err('nombres')) {
-                  <div class="text-danger" style="font-size:0.8rem">
-                    <i class="bi bi-exclamation-circle me-1"></i>{{ err('nombres') }}
-                  </div>
-                } @else { <div></div> }
-                <small [class]="form().nombres.length > 90 ? 'text-danger' : 'text-muted'">
-                  {{ form().nombres.length }}/100
-                </small>
-              </div>
-            </div>
-            <!-- Apellidos -->
-            <div class="col-6">
-              <label class="form-label">Apellidos <span class="text-danger">*</span></label>
-              <input type="text"
-                [class]="'form-control' + (err('apellidos') ? ' is-invalid' : '')"
-                placeholder="Pérez" maxlength="100"
-                [ngModel]="form().apellidos"
-                (ngModelChange)="patchForm('apellidos', $event)"
-                (blur)="tocar('apellidos')"
-                name="apellidos" />
-              <div class="d-flex justify-content-between mt-1">
-                @if (err('apellidos')) {
-                  <div class="text-danger" style="font-size:0.8rem">
-                    <i class="bi bi-exclamation-circle me-1"></i>{{ err('apellidos') }}
-                  </div>
-                } @else { <div></div> }
-                <small [class]="form().apellidos.length > 90 ? 'text-danger' : 'text-muted'">
-                  {{ form().apellidos.length }}/100
-                </small>
-              </div>
-            </div>
-            <!-- Correo -->
-            <div class="col-12">
-              <label class="form-label">Correo electrónico <span class="text-danger">*</span></label>
-              <input type="email"
-                [class]="'form-control' + (err('correo') ? ' is-invalid' : '')"
-                placeholder="correo@empresa.com" maxlength="150"
-                [ngModel]="form().correo"
-                (ngModelChange)="patchForm('correo', $event)"
-                (blur)="tocar('correo')"
-                name="correo" />
-              <div class="d-flex justify-content-between mt-1">
-                @if (err('correo')) {
-                  <div class="text-danger" style="font-size:0.8rem">
-                    <i class="bi bi-exclamation-circle me-1"></i>{{ err('correo') }}
-                  </div>
-                } @else { <div></div> }
-                <small [class]="form().correo.length > 140 ? 'text-danger' : 'text-muted'">
-                  {{ form().correo.length }}/150
-                </small>
-              </div>
-            </div>
-            <!-- Contraseña -->
-            <div class="col-12">
-              <label class="form-label">Contraseña <span class="text-danger">*</span></label>
-              <input type="password"
-                [class]="'form-control' + (err('contrasena') ? ' is-invalid' : '')"
-                placeholder="Mín. 8 caracteres" maxlength="50"
-                [ngModel]="form().contrasena"
-                (ngModelChange)="patchForm('contrasena', $event)"
-                (blur)="tocar('contrasena')"
-                name="contrasena" />
-              <div class="d-flex justify-content-between mt-1">
-                @if (err('contrasena')) {
-                  <div class="text-danger" style="font-size:0.8rem">
-                    <i class="bi bi-exclamation-circle me-1"></i>{{ err('contrasena') }}
-                  </div>
-                } @else {
-                  <small class="text-muted">Entre 8 y 50 caracteres</small>
-                }
-                <small [class]="form().contrasena.length > 45 ? 'text-danger' : 'text-muted'">
-                  {{ form().contrasena.length }}/50
-                </small>
-              </div>
-            </div>
-            <!-- Rol -->
-            <div class="col-12">
-              <label class="form-label">Rol</label>
-              <select class="form-select"
-                [ngModel]="form().rol"
-                (ngModelChange)="patchForm('rol', $event)"
-                name="rol">
-                <option value="EMPLEADO">EMPLEADO</option>
-                <option value="ADMINISTRADOR">ADMINISTRADOR</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="modalAbierto.set(false)">Cancelar</button>
-          <button type="button" class="btn btn-primary btn-sm" (click)="guardar()" [disabled]="!formValido()">
-            <i class="bi bi-check2 me-1"></i>Crear usuario
-          </button>
-        </div>
+        <app-form-usuario
+          (guardado)="onGuardado($event)"
+          (cancelado)="modalAbierto.set(false)" />
       </div>
     </div>
   </div>

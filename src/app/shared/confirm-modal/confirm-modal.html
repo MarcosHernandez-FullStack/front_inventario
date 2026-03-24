@@ -1,0 +1,32 @@
+@if (estado) {
+  <!-- Backdrop -->
+  <div class="confirm-backdrop" (click)="cancelar()"></div>
+
+  <!-- Modal -->
+  <div class="confirm-modal" role="dialog" aria-modal="true">
+    <div class="confirm-modal-inner">
+      <!-- Header -->
+      <div class="confirm-header" [style.background]="colorHeader">
+        <i class="bi" [class]="icono" [style.color]="colorIcono" style="font-size:1.5rem"></i>
+        <span class="confirm-titulo">{{ estado.titulo }}</span>
+      </div>
+
+      <!-- Body -->
+      <div class="confirm-body">
+        <p>{{ estado.mensaje }}</p>
+      </div>
+
+      <!-- Footer -->
+      <div class="confirm-footer">
+        <button class="btn btn-outline-secondary btn-sm" (click)="cancelar()">
+          {{ estado.textoBtnCancelar ?? 'Cancelar' }}
+        </button>
+        <button class="btn btn-sm confirm-btn-aceptar"
+          [style.background]="colorIcono" [style.border-color]="colorIcono"
+          (click)="aceptar()">
+          {{ estado.textoBtnAceptar ?? 'Aceptar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

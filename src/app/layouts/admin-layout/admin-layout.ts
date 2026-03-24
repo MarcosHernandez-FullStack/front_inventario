@@ -3,6 +3,8 @@ import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } fro
 import { filter } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificacionService, AlertaStock } from '../../core/services/notificacion.service';
+import { ConfirmModalComponent } from '../../shared/confirm-modal/confirm-modal';
+import { ToastService } from '../../core/services/toast.service';
 
 const TITLES: Record<string, string> = {
   '/dashboard':  'Dashboard',
@@ -15,16 +17,18 @@ const TITLES: Record<string, string> = {
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ConfirmModalComponent],
   templateUrl: './admin-layout.html',
 })
 export class AdminLayoutComponent implements OnDestroy {
   private readonly authSvc  = inject(AuthService);
   private readonly router   = inject(Router);
   readonly notifSvc         = inject(NotificacionService);
+  readonly toastSvc         = inject(ToastService);
 
   pageTitle       = signal('Dashboard');
   toastActivo     = signal<AlertaStock | null>(null);
+  sidebarOpen     = signal(false);
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
@@ -67,6 +71,9 @@ export class AdminLayoutComponent implements OnDestroy {
   ngOnDestroy() {
     this.notifSvc.desconectar();
   }
+
+  toggleSidebar() { this.sidebarOpen.update(v => !v); }
+  cerrarSidebar()  { this.sidebarOpen.set(false); }
 
   logout() {
     this.notifSvc.desconectar();

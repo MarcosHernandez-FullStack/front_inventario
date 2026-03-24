@@ -40,7 +40,7 @@ interface ProductoBajoStock {
 @Component({
   selector: 'app-reportes',
   standalone: true,
-  imports: [DecimalPipe, DatePipe],
+  imports: [DecimalPipe],
   templateUrl: './reportes.html',
 })
 export class ReportesComponent implements OnInit {

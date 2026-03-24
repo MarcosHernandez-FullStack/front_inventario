@@ -1,0 +1,28 @@
+<div class="modal-body">
+  <label class="form-label">Nombre <span class="text-danger">*</span></label>
+  <input type="text"
+    [class]="'form-control' + (mostrarErr() && errNombre() ? ' is-invalid' : '')"
+    placeholder="Ej: Electrónica"
+    maxlength="100"
+    [ngModel]="nombre()"
+    (ngModelChange)="nombre.set($event); tocar()"
+    (blur)="tocar()"
+    name="nombre" />
+  <div class="d-flex justify-content-between mt-1">
+    @if (mostrarErr() && errNombre()) {
+      <div class="text-danger" style="font-size:0.8rem">
+        <i class="bi bi-exclamation-circle me-1"></i>{{ errNombre() }}
+      </div>
+    } @else { <div></div> }
+    <small [class]="nombre().length > 90 ? 'text-danger' : 'text-muted'">
+      {{ nombre().length }}/100
+    </small>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelado.emit()">Cancelar</button>
+  <button type="button" class="btn btn-primary btn-sm" (click)="guardar()" [disabled]="!formValido()">
+    <i class="bi bi-check2 me-1"></i>{{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+  </button>
+</div>

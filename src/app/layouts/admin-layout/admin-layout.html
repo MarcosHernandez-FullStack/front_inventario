@@ -1,5 +1,10 @@
+<!-- Overlay móvil -->
+@if (sidebarOpen()) {
+  <div class="sidebar-overlay" (click)="cerrarSidebar()"></div>
+}
+
 <!-- Sidebar -->
-<aside class="sidebar">
+<aside class="sidebar" [class.sidebar-open]="sidebarOpen()">
   <div class="sidebar-brand">
     <div class="d-flex align-items-center gap-2">
       <div style="width:34px;height:34px;background:linear-gradient(135deg,#3b6cf8,#6d9bff);border-radius:0.5rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -14,13 +19,13 @@
 
   <nav class="sidebar-nav">
     <div class="nav-label">Principal</div>
-    <a routerLink="/dashboard" routerLinkActive="active" class="sidebar-link">
+    <a routerLink="/dashboard" routerLinkActive="active" class="sidebar-link" (click)="cerrarSidebar()">
       <i class="bi bi-speedometer2"></i> Dashboard
     </a>
-    <a routerLink="/productos" routerLinkActive="active" class="sidebar-link">
+    <a routerLink="/productos" routerLinkActive="active" class="sidebar-link" (click)="cerrarSidebar()">
       <i class="bi bi-box-seam"></i> Productos
     </a>
-    <a routerLink="/reportes" routerLinkActive="active" class="sidebar-link d-flex align-items-center justify-content-between">
+    <a routerLink="/reportes" routerLinkActive="active" class="sidebar-link d-flex align-items-center justify-content-between" (click)="cerrarSidebar()">
       <span><i class="bi bi-bar-chart-line me-2"></i>Reportes</span>
       @if (esAdmin && totalNoLeidas > 0) {
         <span style="background:#dc3545;color:#fff;border-radius:999px;font-size:0.7rem;font-weight:700;padding:0.1rem 0.45rem;min-width:18px;text-align:center">
@@ -30,10 +35,10 @@
     </a>
     @if (esAdmin) {
       <div class="nav-label">Administración</div>
-      <a routerLink="/categorias" routerLinkActive="active" class="sidebar-link">
+      <a routerLink="/categorias" routerLinkActive="active" class="sidebar-link" (click)="cerrarSidebar()">
         <i class="bi bi-tag"></i> Categorías
       </a>
-      <a routerLink="/usuarios" routerLinkActive="active" class="sidebar-link">
+      <a routerLink="/usuarios" routerLinkActive="active" class="sidebar-link" (click)="cerrarSidebar()">
         <i class="bi bi-people"></i> Usuarios
       </a>
     }
@@ -59,13 +64,19 @@
 <!-- Main -->
 <div class="main-wrapper">
   <header class="topbar">
-    <span class="topbar-title">{{ pageTitle() }}</span>
+    <div class="d-flex align-items-center gap-3">
+      <button class="hamburger-btn" (click)="toggleSidebar()" aria-label="Menú">
+        <i class="bi" [class.bi-list]="!sidebarOpen()" [class.bi-x-lg]="sidebarOpen()"></i>
+      </button>
+      <span class="topbar-title">{{ pageTitle() }}</span>
+    </div>
     <div class="d-flex align-items-center gap-3">
       <span class="badge-{{ session?.rol === 'ADMINISTRADOR' ? 'admin' : 'usuario' }}" title="{{ session?.rol }}">
         {{ session?.rol }}
       </span>
     </div>
   </header>
+
 
   <main class="page-content">
     <router-outlet />
@@ -98,6 +109,26 @@
     </div>
   </div>
 }
+
+<!-- Toast CRUD (éxito / error / advertencia) -->
+@if (toastSvc.toast(); as t) {
+  <div style="position:fixed;top:1.25rem;right:1.25rem;z-index:10000;min-width:280px;max-width:360px;animation:slideIn 0.3s ease">
+    <div [style]="'border-radius:0.65rem;box-shadow:0 6px 24px rgba(0,0,0,0.15);overflow:hidden;border-left:4px solid ' +
+      (t.tipo === 'success' ? '#198754' : t.tipo === 'error' ? '#dc3545' : '#f59e0b')">
+      <div [style]="'padding:0.7rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;background:' +
+        (t.tipo === 'success' ? '#f0fdf4' : t.tipo === 'error' ? '#fff3f3' : '#fffbeb')">
+        <div class="d-flex align-items-center gap-2">
+          <i [class]="'bi fs-6 ' + (t.tipo === 'success' ? 'bi-check-circle-fill text-success' : t.tipo === 'error' ? 'bi-x-circle-fill text-danger' : 'bi-exclamation-triangle-fill text-warning')"></i>
+          <span style="font-size:0.875rem;font-weight:600;color:#1e2a3b">{{ t.mensaje }}</span>
+        </div>
+        <button (click)="toastSvc.cerrar()" class="btn-close" style="font-size:0.6rem;flex-shrink:0"></button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal de confirmación reutilizable -->
+<app-confirm-modal />
 
 <style>
   @keyframes slideIn {

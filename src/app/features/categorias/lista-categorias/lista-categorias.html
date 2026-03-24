@@ -51,7 +51,7 @@
               <td class="fw-semibold" style="color:#1e2a3b">{{ c.nombre }}</td>
               <td class="d-none d-sm-table-cell">
                 <button
-                  (click)="eliminar(c.id)"
+                  (click)="cambiarEstado(c.id, c.estado)"
                   class="btn btn-sm"
                   style="font-size:0.72rem;font-weight:600;padding:0.25rem 0.7rem;border-radius:2rem"
                   [class]="c.estado === 'ACTIVO' ? 'badge-activo border-0' : 'badge-inactivo border-0'"
@@ -98,53 +98,11 @@
           <h5 class="modal-title fw-bold">{{ modoEdicion() ? 'Editar categoría' : 'Nueva categoría' }}</h5>
           <button type="button" class="btn-close" (click)="modalAbierto.set(false)"></button>
         </div>
-        <div class="modal-body">
-          <label class="form-label">Nombre <span class="text-danger">*</span></label>
-          @if (!modoEdicion()) {
-            <input type="text"
-              [class]="'form-control' + (mostrarError('nombre') && errNombre() ? ' is-invalid' : '')"
-              placeholder="Ej: Electrónica"
-              maxlength="100"
-              [ngModel]="form().nombre"
-              (ngModelChange)="form.update(f => ({...f, nombre: $event})); tocar('nombre')"
-              (blur)="tocar('nombre')"
-              name="nombre" />
-            <div class="d-flex justify-content-between mt-1">
-              @if (mostrarError('nombre') && errNombre()) {
-                <div class="text-danger" style="font-size:0.8rem">
-                  <i class="bi bi-exclamation-circle me-1"></i>{{ errNombre() }}
-                </div>
-              } @else { <div></div> }
-              <small [class]="form().nombre.length > 90 ? 'text-danger' : 'text-muted'">
-                {{ form().nombre.length }}/100
-              </small>
-            </div>
-          } @else {
-            <input type="text"
-              [class]="'form-control' + (mostrarError('nombre') && errNombre() ? ' is-invalid' : '')"
-              maxlength="100"
-              [ngModel]="nombreEdit()"
-              (ngModelChange)="nombreEdit.set($event); tocar('nombre')"
-              (blur)="tocar('nombre')"
-              name="nombreEdit" />
-            <div class="d-flex justify-content-between mt-1">
-              @if (mostrarError('nombre') && errNombre()) {
-                <div class="text-danger" style="font-size:0.8rem">
-                  <i class="bi bi-exclamation-circle me-1"></i>{{ errNombre() }}
-                </div>
-              } @else { <div></div> }
-              <small [class]="nombreEdit().length > 90 ? 'text-danger' : 'text-muted'">
-                {{ nombreEdit().length }}/100
-              </small>
-            </div>
-          }
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="modalAbierto.set(false)">Cancelar</button>
-          <button type="button" class="btn btn-primary btn-sm" (click)="guardar()" [disabled]="!formValido()">
-            <i class="bi bi-check2 me-1"></i>Guardar
-          </button>
-        </div>
+        <app-form-categoria
+          [modoEdicion]="modoEdicion()"
+          [nombreInicial]="nombreEdit()"
+          (guardado)="onGuardado($event)"
+          (cancelado)="modalAbierto.set(false)" />
       </div>
     </div>
   </div>

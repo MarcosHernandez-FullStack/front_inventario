@@ -1,32 +1,37 @@
 import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { Categoria, CrearCategoria } from '../../../models/categoria.model';
+import { Categoria } from '../../../models/categoria.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
+import { ToastService } from '../../../core/services/toast.service';
+import { FormCategoriaComponent } from '../form-categoria/form-categoria';
 import { environment } from '../../../../environments/environment';
 
 const MOCK_CATEGORIAS: Categoria[] = [
-  { id: 1, nombre: 'Computadoras',    estado: 'ACTIVO' },
-  { id: 2, nombre: 'Monitores',       estado: 'ACTIVO' },
-  { id: 3, nombre: 'Periféricos',     estado: 'ACTIVO' },
-  { id: 4, nombre: 'Almacenamiento',  estado: 'ACTIVO' },
-  { id: 5, nombre: 'Audio',           estado: 'INACTIVO' },
+  { id: 1, nombre: 'Computadoras',   estado: 'ACTIVO'   },
+  { id: 2, nombre: 'Monitores',      estado: 'ACTIVO'   },
+  { id: 3, nombre: 'Periféricos',    estado: 'ACTIVO'   },
+  { id: 4, nombre: 'Almacenamiento', estado: 'ACTIVO'   },
+  { id: 5, nombre: 'Audio',          estado: 'INACTIVO' },
 ];
 
 @Component({
   selector: 'app-lista-categorias',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, FormCategoriaComponent],
   templateUrl: './lista-categorias.html',
 })
 export class ListaCategoriasComponent implements OnInit {
-  private readonly http    = inject(HttpClient);
-  private readonly authSvc = inject(AuthService);
-  private readonly api     = `${environment.apiUrl}/categorias`;
+  private readonly http       = inject(HttpClient);
+  private readonly authSvc    = inject(AuthService);
+  private readonly confirmSvc = inject(ConfirmService);
+  private readonly toastSvc   = inject(ToastService);
+  private readonly api        = `${environment.apiUrl}/categorias`;
 
-  categorias    = signal<Categoria[]>([]);
-  busqueda      = signal('');
-  paginaActual  = signal(1);
+  categorias   = signal<Categoria[]>([]);
+  busqueda     = signal('');
+  paginaActual = signal(1);
   readonly porPagina = 5;
   cargando     = signal(false);
   error        = signal('');
@@ -34,7 +39,6 @@ export class ListaCategoriasComponent implements OnInit {
   modoEdicion  = signal(false);
   idEditando   = signal<number | null>(null);
   nombreEdit   = signal('');
-  tocado       = signal<Set<string>>(new Set());
 
   categoriasFiltradas = computed(() => {
     const q = this.busqueda().toLowerCase();
@@ -42,9 +46,9 @@ export class ListaCategoriasComponent implements OnInit {
     return q ? lista.filter(c => c.nombre.toLowerCase().includes(q)) : lista;
   });
 
-  totalPaginas   = computed(() => Math.max(1, Math.ceil(this.categoriasFiltradas().length / this.porPagina)));
-  paginas        = computed(() => Array.from({ length: this.totalPaginas() }, (_, i) => i + 1));
-  categoriasPag  = computed(() => {
+  totalPaginas  = computed(() => Math.max(1, Math.ceil(this.categoriasFiltradas().length / this.porPagina)));
+  paginas       = computed(() => Array.from({ length: this.totalPaginas() }, (_, i) => i + 1));
+  categoriasPag = computed(() => {
     const ini = (this.paginaActual() - 1) * this.porPagina;
     return this.categoriasFiltradas().slice(ini, ini + this.porPagina);
   });
@@ -52,29 +56,7 @@ export class ListaCategoriasComponent implements OnInit {
   setBusqueda(v: string) { this.busqueda.set(v); this.paginaActual.set(1); }
   irAPagina(n: number)   { this.paginaActual.set(n); }
 
-  form = signal<CrearCategoria>({ nombre: '', creadoPor: '' });
-
   private get usuarioActual() { return this.authSvc.session()?.correo ?? ''; }
-
-  // ── Validación ──────────────────────────────────────────────
-  errNombre = computed(() => {
-    const v = this.modoEdicion() ? this.nombreEdit() : this.form().nombre;
-    if (!v.trim())            return 'El nombre es requerido.';
-    if (v.trim().length < 2)  return 'Mínimo 2 caracteres.';
-    if (v.length > 100)       return 'Máximo 100 caracteres.';
-    return '';
-  });
-
-  formValido = computed(() => !this.errNombre());
-
-  tocar(campo: string) {
-    this.tocado.update(s => new Set(s).add(campo));
-  }
-
-  mostrarError(campo: string) {
-    return this.tocado().has(campo);
-  }
-  // ────────────────────────────────────────────────────────────
 
   ngOnInit() { this.cargar(); }
 
@@ -89,8 +71,7 @@ export class ListaCategoriasComponent implements OnInit {
   abrirNuevo() {
     this.modoEdicion.set(false);
     this.idEditando.set(null);
-    this.form.set({ nombre: '', creadoPor: this.usuarioActual });
-    this.tocado.set(new Set());
+    this.nombreEdit.set('');
     this.modalAbierto.set(true);
   }
 
@@ -98,25 +79,31 @@ export class ListaCategoriasComponent implements OnInit {
     this.modoEdicion.set(true);
     this.idEditando.set(c.id);
     this.nombreEdit.set(c.nombre);
-    this.tocado.set(new Set());
     this.modalAbierto.set(true);
   }
 
-  guardar() {
-    this.tocado.set(new Set(['nombre']));
-    if (!this.formValido()) return;
-
+  onGuardado(data: { nombre: string }) {
     if (this.modoEdicion()) {
-      this.http.put(`${this.api}/${this.idEditando()}`, { nombre: this.nombreEdit(), actualizadoPor: this.usuarioActual })
-        .subscribe({ next: () => { this.modalAbierto.set(false); this.cargar(); } });
+      this.http.put(`${this.api}/${this.idEditando()}`, { nombre: data.nombre, actualizadoPor: this.usuarioActual })
+        .subscribe({ next: () => { this.modalAbierto.set(false); this.cargar(); this.toastSvc.mostrar('Categoría actualizada correctamente'); } });
     } else {
-      this.http.post(this.api, this.form())
-        .subscribe({ next: () => { this.modalAbierto.set(false); this.cargar(); } });
+      this.http.post(this.api, { nombre: data.nombre, creadoPor: this.usuarioActual })
+        .subscribe({ next: () => { this.modalAbierto.set(false); this.cargar(); this.toastSvc.mostrar('Categoría creada correctamente'); } });
     }
   }
 
-  eliminar(id: number) {
-    if (!confirm('¿Eliminar esta categoría?')) return;
-    this.http.delete(`${this.api}/${id}`).subscribe({ next: () => this.cargar() });
+  async cambiarEstado(id: number, estadoActual: string) {
+    const nuevoEstado = estadoActual === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
+    const ok = await this.confirmSvc.mostrar({
+      titulo:  nuevoEstado === 'INACTIVO' ? 'Desactivar categoría' : 'Activar categoría',
+      mensaje: nuevoEstado === 'INACTIVO'
+        ? '¿Deseas desactivar esta categoría?'
+        : '¿Deseas activar esta categoría?',
+      tipo: nuevoEstado === 'INACTIVO' ? 'warning' : 'success',
+      textoBtnAceptar: nuevoEstado === 'INACTIVO' ? 'Desactivar' : 'Activar',
+    });
+    if (!ok) return;
+    this.http.patch(`${this.api}/${id}/estado`, { estado: nuevoEstado, actualizadoPor: this.usuarioActual })
+      .subscribe({ next: () => { this.cargar(); this.toastSvc.mostrar(nuevoEstado === 'ACTIVO' ? 'Categoría activada' : 'Categoría desactivada'); } });
   }
 }

@@ -1,0 +1,112 @@
+<div class="modal-body">
+  <div class="row g-3">
+    <!-- Nombre -->
+    <div class="col-12">
+      <label class="form-label">Nombre <span class="text-danger">*</span></label>
+      <input type="text"
+        [class]="'form-control' + (err('nombre') ? ' is-invalid' : '')"
+        placeholder="Ej: Laptop HP" maxlength="150"
+        [ngModel]="form().nombre"
+        (ngModelChange)="patch('nombre', $event)"
+        (blur)="tocar('nombre')"
+        name="nombre" />
+      <div class="d-flex justify-content-between mt-1">
+        @if (err('nombre')) {
+          <div class="text-danger" style="font-size:0.8rem">
+            <i class="bi bi-exclamation-circle me-1"></i>{{ err('nombre') }}
+          </div>
+        } @else { <div></div> }
+        <small [class]="form().nombre.length > 140 ? 'text-danger' : 'text-muted'">
+          {{ form().nombre.length }}/150
+        </small>
+      </div>
+    </div>
+    <!-- Descripción -->
+    <div class="col-12">
+      <label class="form-label">Descripción</label>
+      <textarea
+        [class]="'form-control' + (err('descripcion') ? ' is-invalid' : '')"
+        rows="2" placeholder="Descripción opcional" maxlength="500"
+        [ngModel]="form().descripcion"
+        (ngModelChange)="patch('descripcion', $event)"
+        (blur)="tocar('descripcion')"
+        name="descripcion"></textarea>
+      <div class="d-flex justify-content-between mt-1">
+        @if (err('descripcion')) {
+          <div class="text-danger" style="font-size:0.8rem">
+            <i class="bi bi-exclamation-circle me-1"></i>{{ err('descripcion') }}
+          </div>
+        } @else { <div></div> }
+        <small [class]="(form().descripcion.length) > 480 ? 'text-danger' : 'text-muted'">
+          {{ form().descripcion.length }}/500
+        </small>
+      </div>
+    </div>
+    <!-- Precio -->
+    <div class="col-6">
+      <label class="form-label">Precio <span class="text-danger">*</span></label>
+      <div class="input-group">
+        <span class="input-group-text">S/</span>
+        <input type="number"
+          [class]="'form-control' + (err('precio') ? ' is-invalid' : '')"
+          min="0.01" max="99999.99" step="0.01"
+          [ngModel]="form().precio"
+          (ngModelChange)="patch('precio', +$event)"
+          (blur)="tocar('precio')"
+          name="precio" />
+      </div>
+      @if (err('precio')) {
+        <div class="text-danger mt-1" style="font-size:0.8rem">
+          <i class="bi bi-exclamation-circle me-1"></i>{{ err('precio') }}
+        </div>
+      } @else {
+        <small class="text-muted">Máx. S/ 99,999.99</small>
+      }
+    </div>
+    <!-- Cantidad -->
+    <div class="col-6">
+      <label class="form-label">Cantidad <span class="text-danger">*</span></label>
+      <input type="number"
+        [class]="'form-control' + (err('cantidad') ? ' is-invalid' : '')"
+        min="0" max="99999" step="1"
+        [ngModel]="form().cantidad"
+        (ngModelChange)="patch('cantidad', +$event)"
+        (blur)="tocar('cantidad')"
+        name="cantidad" />
+      @if (err('cantidad')) {
+        <div class="invalid-feedback d-block" style="font-size:0.8rem">
+          <i class="bi bi-exclamation-circle me-1"></i>{{ err('cantidad') }}
+        </div>
+      } @else {
+        <small class="text-muted">Máx. 99,999 unidades</small>
+      }
+    </div>
+    <!-- Categoría -->
+    <div class="col-12">
+      <label class="form-label">Categoría <span class="text-danger">*</span></label>
+      <select
+        [class]="'form-select' + (err('idCategoria') ? ' is-invalid' : '')"
+        [ngModel]="form().idCategoria"
+        (ngModelChange)="patch('idCategoria', +$event)"
+        (blur)="tocar('idCategoria')"
+        name="idCategoria">
+        <option [value]="0" disabled>Selecciona una categoría</option>
+        @for (c of categorias; track c.id) {
+          <option [value]="c.id">{{ c.nombre }}</option>
+        }
+      </select>
+      @if (err('idCategoria')) {
+        <div class="invalid-feedback d-block" style="font-size:0.8rem">
+          <i class="bi bi-exclamation-circle me-1"></i>{{ err('idCategoria') }}
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelado.emit()">Cancelar</button>
+  <button type="button" class="btn btn-primary btn-sm" (click)="guardar()" [disabled]="!formValido()">
+    <i class="bi bi-check2 me-1"></i>{{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+  </button>
+</div>

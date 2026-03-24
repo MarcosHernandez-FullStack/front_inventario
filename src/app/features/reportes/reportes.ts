@@ -5,6 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { NotificacionService } from '../../core/services/notificacion.service';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { environment } from '../../../environments/environment';
 
 const MOCK_REPORTE = [
   { categoria: 'Computadoras',   totalProductos: 3, stockTotal: 25, valorTotal: 12450.50 },
@@ -45,7 +46,7 @@ interface ProductoBajoStock {
 export class ReportesComponent implements OnInit {
   private readonly http    = inject(HttpClient);
   private readonly authSvc = inject(AuthService);
-  private readonly api     = 'http://localhost:5000/api/reportes';
+  private readonly api     = `${environment.apiUrl}/reportes`;
 
   esAdmin    = computed(() => this.authSvc.esAdmin());
   notifSvc   = inject(NotificacionService);

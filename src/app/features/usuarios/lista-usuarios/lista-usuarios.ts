@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Usuario, CrearUsuario } from '../../../models/usuario.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 const MOCK_USUARIOS: Usuario[] = [
   { id: 1, nombres: 'Carlos',   apellidos: 'Mendoza',  celular: '987654321', correo: 'carlos@empresa.com',   rol: 'ADMINISTRADOR', estado: 'ACTIVO'   },
@@ -22,7 +23,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export class ListaUsuariosComponent implements OnInit {
   private readonly http    = inject(HttpClient);
   private readonly authSvc = inject(AuthService);
-  private readonly api     = 'http://localhost:5000/api/usuarios';
+  private readonly api     = `${environment.apiUrl}/usuarios`;
 
   usuarios      = signal<Usuario[]>([]);
   busqueda      = signal('');

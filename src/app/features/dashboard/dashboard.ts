@@ -2,6 +2,7 @@ import { Component, signal, inject, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 interface DashStats {
   totalProductos: number;
@@ -23,7 +24,7 @@ export class DashboardComponent implements OnInit {
   cargando = signal(true);
 
   ngOnInit() {
-    this.http.get<DashStats>('http://localhost:5000/api/reportes/resumen').subscribe({
+    this.http.get<DashStats>(`${environment.apiUrl}/reportes/resumen`).subscribe({
       next: data => { this.stats.set(data); this.cargando.set(false); },
       error: ()   => {
         this.stats.set({ totalProductos: 16, totalCategorias: 5, totalUsuarios: 4, valorInventario: 26540.80 });

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Categoria, CrearCategoria } from '../../../models/categoria.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 const MOCK_CATEGORIAS: Categoria[] = [
   { id: 1, nombre: 'Computadoras',    estado: 'ACTIVO' },
@@ -21,7 +22,7 @@ const MOCK_CATEGORIAS: Categoria[] = [
 export class ListaCategoriasComponent implements OnInit {
   private readonly http    = inject(HttpClient);
   private readonly authSvc = inject(AuthService);
-  private readonly api     = 'http://localhost:5000/api/categorias';
+  private readonly api     = `${environment.apiUrl}/categorias`;
 
   categorias    = signal<Categoria[]>([]);
   busqueda      = signal('');

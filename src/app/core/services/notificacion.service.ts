@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { AuthService } from './auth.service';
+import { environment } from '../../../environments/environment';
 
 export interface AlertaStock {
   mensaje:      string;
@@ -21,7 +22,7 @@ export class NotificacionService {
     if (this.connection) return;
 
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:5000/hubs/notificaciones')
+      .withUrl(environment.signalrUrl)
       .withAutomaticReconnect()
       .build();
 

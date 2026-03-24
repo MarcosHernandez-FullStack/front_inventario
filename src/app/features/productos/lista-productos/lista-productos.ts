@@ -5,6 +5,7 @@ import { DecimalPipe } from '@angular/common';
 import { Producto, CrearProducto, ActualizarProducto } from '../../../models/producto.model';
 import { Categoria } from '../../../models/categoria.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 const MOCK_PRODUCTOS: Producto[] = [
   { id: 1, nombre: 'Laptop HP 15"',       descripcion: 'Intel Core i5, 8GB RAM, 512GB SSD', precio: 2899.90, cantidad: 12, idCategoria: 1, nombreCategoria: 'Computadoras', estado: 'ACTIVO' },
@@ -24,7 +25,7 @@ const MOCK_PRODUCTOS: Producto[] = [
 export class ListaProductosComponent implements OnInit {
   private readonly http    = inject(HttpClient);
   private readonly authSvc = inject(AuthService);
-  private readonly api     = 'http://localhost:5000/api/productos';
+  private readonly api     = `${environment.apiUrl}/productos`;
 
   productos     = signal<Producto[]>([]);
   categorias    = signal<Categoria[]>([]);
@@ -97,9 +98,9 @@ export class ListaProductosComponent implements OnInit {
 
   ngOnInit() {
     this.cargar();
-    this.http.get<Categoria[]>('http://localhost:5000/api/categorias').subscribe({
+    this.http.get<Categoria[]>(`${environment.apiUrl}/categorias`).subscribe({
       next: data => this.categorias.set(data.filter(c => c.estado === 'ACTIVO')),
-      error: ()  => this.categorias.set([
+      error: () => this.categorias.set([
         { id: 1, nombre: 'Computadoras',   estado: 'ACTIVO' },
         { id: 2, nombre: 'Monitores',      estado: 'ACTIVO' },
         { id: 3, nombre: 'Periféricos',    estado: 'ACTIVO' },

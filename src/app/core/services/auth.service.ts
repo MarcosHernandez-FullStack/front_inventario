@@ -2,9 +2,10 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { LoginRequest, LoginResponse } from '../../models/auth.model';
 import { tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 const SESSION_KEY = 'inv_session';
-const API = 'http://localhost:5000/api';
+const API = environment.apiUrl;
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {

@@ -1,0 +1,169 @@
+<!-- Header -->
+<div class="card-header-custom mb-4">
+  <div>
+    <h5 class="fw-bold mb-0" style="color:#1e2a3b">Reportes</h5>
+    <small class="text-muted">Stock e inventario por categoría</small>
+  </div>
+  <div class="d-flex gap-2">
+    <button (click)="cargar()" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+      <i class="bi bi-arrow-clockwise"></i> Actualizar
+    </button>
+    @if (!esAdmin()) {
+      <button (click)="notificarAdmin()" class="btn btn-warning btn-sm d-flex align-items-center gap-2"
+        [disabled]="notificando() || notificado() || bajoStock().length === 0">
+        @if (notificando()) {
+          <span class="spinner-border spinner-border-sm"></span> Enviando...
+        } @else if (notificado()) {
+          <i class="bi bi-check2-circle"></i> Notificación enviada
+        } @else {
+          <i class="bi bi-bell-fill"></i> Notificar al administrador
+        }
+      </button>
+    }
+    @if (esAdmin()) {
+    <button (click)="generarPDF()" class="btn btn-danger btn-sm d-flex align-items-center gap-2"
+      [disabled]="generando() || bajoStock().length === 0">
+      @if (generando()) {
+        <span class="spinner-border spinner-border-sm"></span> Generando...
+      } @else {
+        <i class="bi bi-file-earmark-pdf-fill"></i> Exportar PDF
+      }
+    </button>
+    }
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-3" style="font-size:0.85rem">
+    <i class="bi bi-exclamation-circle-fill"></i>{{ error() }}
+  </div>
+}
+
+<!-- Summary cards -->
+<div class="row g-3 mb-4">
+  <div class="col-12 col-sm-4">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="bi bi-box-seam-fill"></i></div>
+      <div>
+        <div class="stat-label">Total productos</div>
+        <div class="stat-value">{{ totalProductos }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-sm-4">
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="bi bi-stack"></i></div>
+      <div>
+        <div class="stat-label">Stock total</div>
+        <div class="stat-value">{{ stockTotal }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-sm-4">
+    <div class="stat-card">
+      <div class="stat-icon amber"><i class="bi bi-currency-dollar"></i></div>
+      <div>
+        <div class="stat-label">Valor total</div>
+        <div class="stat-value" style="font-size:1.3rem">{{ valorTotal | number:'1.2-2' }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bajo stock alert -->
+@if (bajoStock().length > 0) {
+  <div class="d-flex align-items-center gap-2 mb-2">
+    <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+    <span class="fw-semibold" style="color:#1e2a3b;font-size:0.9rem">
+      Productos con inventario bajo ({{ bajoStock().length }})
+    </span>
+    <span class="badge bg-danger ms-1">Acción requerida</span>
+  </div>
+  <div class="table-card mb-4">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th class="d-none d-md-table-cell">Categoría</th>
+            <th class="text-end">Precio</th>
+            <th class="text-center">Stock</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of bajoStock(); track p.id) {
+            <tr>
+              <td>
+                <div class="fw-semibold" style="color:#1e2a3b;font-size:0.875rem">{{ p.nombre }}</div>
+                @if (p.descripcion) {
+                  <div class="text-muted" style="font-size:0.75rem">{{ p.descripcion }}</div>
+                }
+              </td>
+              <td class="d-none d-md-table-cell text-muted" style="font-size:0.875rem">{{ p.nombreCategoria }}</td>
+              <td class="text-end" style="font-size:0.875rem">S/ {{ p.precio | number:'1.2-2' }}</td>
+              <td class="text-center">
+                <span class="fw-bold" style="color:#dc3545;font-size:0.9rem">{{ p.cantidad }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+<!-- Stock por categoría -->
+<div class="fw-semibold mb-2" style="color:#1e2a3b;font-size:0.9rem">
+  <i class="bi bi-bar-chart-line me-1 text-primary"></i> Stock por categoría
+</div>
+<div class="table-card">
+  @if (cargando()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" style="width:2rem;height:2rem"></div>
+      <p class="text-muted mt-2 mb-0" style="font-size:0.875rem">Generando reporte...</p>
+    </div>
+  } @else if (datos().length === 0) {
+    <div class="empty-state">
+      <i class="bi bi-bar-chart-line"></i>
+      <p>Sin datos para mostrar.</p>
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Categoría</th>
+            <th class="text-end">Productos</th>
+            <th class="text-end">Stock</th>
+            <th class="text-end">Valor (S/)</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of datos(); track r.categoria) {
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="stat-icon green" style="width:30px;height:30px;font-size:0.75rem;flex-shrink:0">
+                    <i class="bi bi-tag-fill"></i>
+                  </div>
+                  <span class="fw-semibold" style="color:#1e2a3b">{{ r.categoria }}</span>
+                </div>
+              </td>
+              <td class="text-end">{{ r.totalProductos }}</td>
+              <td class="text-end">{{ r.stockTotal }}</td>
+              <td class="text-end fw-bold" style="color:#1e2a3b">{{ r.valorTotal | number:'1.2-2' }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr style="background:#f8fafc;font-weight:700;border-top:2px solid #e8ecf4">
+            <td class="text-muted" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:0.04em">Total</td>
+            <td class="text-end">{{ totalProductos }}</td>
+            <td class="text-end">{{ stockTotal }}</td>
+            <td class="text-end" style="color:#3b6cf8">{{ valorTotal | number:'1.2-2' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  }
+</div>

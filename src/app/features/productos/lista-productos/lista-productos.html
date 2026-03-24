@@ -1,0 +1,351 @@
+<!-- Header -->
+<div class="card-header-custom">
+  <div>
+    <h5 class="fw-bold mb-0" style="color:#1e2a3b">Productos</h5>
+    <small class="text-muted">{{ productosFiltrados().length }} de {{ productos().length }} productos</small>
+  </div>
+  @if (esAdmin()) {
+    <button (click)="abrirNuevo()" class="btn btn-primary btn-sm d-flex align-items-center gap-2">
+      <i class="bi bi-plus-lg"></i> Nuevo producto
+    </button>
+  }
+</div>
+
+<!-- Search -->
+<div class="d-flex align-items-center gap-3 mb-3">
+  <div class="search-box flex-grow-1">
+    <i class="bi bi-search"></i>
+    <input type="text" class="form-control" placeholder="Buscar por nombre o categoría..."
+      [ngModel]="busqueda()" (ngModelChange)="setBusqueda($event)" name="busqueda" />
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2 py-2" style="font-size:0.85rem">
+    <i class="bi bi-exclamation-circle-fill"></i>{{ error() }}
+  </div>
+}
+
+<!-- Table -->
+<div class="table-card">
+  @if (cargando()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" style="width:2rem;height:2rem"></div>
+      <p class="text-muted mt-2 mb-0" style="font-size:0.875rem">Cargando productos...</p>
+    </div>
+  } @else if (productosFiltrados().length === 0) {
+    <div class="empty-state">
+      <i class="bi bi-box-seam"></i>
+      <p>No se encontraron productos.</p>
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th>Nombre</th>
+            <th class="d-none d-md-table-cell">Categoría</th>
+            <th class="text-end">Precio</th>
+            <th class="text-end">Cantidad</th>
+            <th class="d-none d-sm-table-cell">Estado</th>
+            @if (esAdmin()) { <th class="text-center">Acciones</th> }
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of productosPag(); track p.id; let i = $index) {
+            @let offset = (paginaActual() - 1) * porPagina;
+            <tr>
+              <td class="text-muted" style="font-size:0.85rem">{{ offset + i + 1 }}</td>
+              <td>
+                <div class="fw-semibold" style="color:#1e2a3b">{{ p.nombre }}</div>
+                @if (p.descripcion) {
+                  <div class="text-muted" style="font-size:0.78rem;line-height:1.3">{{ p.descripcion }}</div>
+                }
+              </td>
+              <td class="d-none d-md-table-cell text-muted">{{ p.nombreCategoria }}</td>
+              <td class="text-end fw-semibold">{{ p.precio | number:'1.2-2' }}</td>
+              <td class="text-end">
+                <span [class]="p.cantidad <= 5 ? 'text-danger fw-bold' : ''">{{ p.cantidad }}</span>
+              </td>
+              <td class="d-none d-sm-table-cell">
+                @if (esAdmin()) {
+                  <button
+                    (click)="cambiarEstado(p.id, p.estado)"
+                    class="btn btn-sm"
+                    style="font-size:0.72rem;font-weight:600;padding:0.25rem 0.7rem;border-radius:2rem"
+                    [class]="p.estado === 'ACTIVO' ? 'badge-activo border-0' : 'badge-inactivo border-0'"
+                    title="Clic para cambiar estado">
+                    {{ p.estado }}
+                  </button>
+                } @else {
+                  <span class="badge-{{ p.estado === 'ACTIVO' ? 'activo' : 'inactivo' }}"
+                    style="font-size:0.72rem;font-weight:600;padding:0.25rem 0.7rem;border-radius:2rem">
+                    {{ p.estado }}
+                  </span>
+                }
+              </td>
+              @if (esAdmin()) {
+                <td class="text-center">
+                  <button (click)="abrirEdicion(p)" class="btn btn-sm btn-outline-secondary" title="Editar"
+                    style="padding:0.25rem 0.5rem">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (totalPaginas() > 1) {
+      <div class="paginacion">
+        <span>Mostrando {{ (paginaActual()-1)*porPagina+1 }}–{{ paginaActual()*porPagina < productosFiltrados().length ? paginaActual()*porPagina : productosFiltrados().length }} de {{ productosFiltrados().length }}</span>
+        <div class="d-flex gap-1">
+          <button class="page-btn" (click)="irAPagina(paginaActual()-1)" [disabled]="paginaActual()===1">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          @for (p of paginas(); track p) {
+            <button class="page-btn" [class.active]="p===paginaActual()" (click)="irAPagina(p)">{{ p }}</button>
+          }
+          <button class="page-btn" (click)="irAPagina(paginaActual()+1)" [disabled]="paginaActual()===totalPaginas()">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<!-- Modal -->
+@if (modalAbierto()) {
+  <div class="modal d-block" tabindex="-1" style="background:rgba(0,0,0,0.45)">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">{{ modoEdicion() ? 'Editar producto' : 'Nuevo producto' }}</h5>
+          <button type="button" class="btn-close" (click)="modalAbierto.set(false)"></button>
+        </div>
+        <div class="modal-body">
+          @if (!modoEdicion()) {
+            <div class="row g-3">
+              <!-- Nombre -->
+              <div class="col-12">
+                <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                <input type="text"
+                  [class]="'form-control' + (err('nombre') ? ' is-invalid' : '')"
+                  placeholder="Ej: Laptop HP"
+                  maxlength="150"
+                  [ngModel]="formNuevo().nombre"
+                  (ngModelChange)="patchNuevo('nombre', $event)"
+                  (blur)="tocar('nombre')"
+                  name="nombre" />
+                <div class="d-flex justify-content-between mt-1">
+                  @if (err('nombre')) {
+                    <div class="text-danger" style="font-size:0.8rem">
+                      <i class="bi bi-exclamation-circle me-1"></i>{{ err('nombre') }}
+                    </div>
+                  } @else { <div></div> }
+                  <small [class]="formNuevo().nombre.length > 140 ? 'text-danger' : 'text-muted'">
+                    {{ formNuevo().nombre.length }}/150
+                  </small>
+                </div>
+              </div>
+              <!-- Descripción -->
+              <div class="col-12">
+                <label class="form-label">Descripción</label>
+                <textarea
+                  [class]="'form-control' + (err('descripcion') ? ' is-invalid' : '')"
+                  rows="2" placeholder="Descripción opcional"
+                  maxlength="500"
+                  [ngModel]="formNuevo().descripcion"
+                  (ngModelChange)="patchNuevo('descripcion', $event)"
+                  (blur)="tocar('descripcion')"
+                  name="desc"></textarea>
+                <div class="d-flex justify-content-between mt-1">
+                  @if (err('descripcion')) {
+                    <div class="text-danger" style="font-size:0.8rem">
+                      <i class="bi bi-exclamation-circle me-1"></i>{{ err('descripcion') }}
+                    </div>
+                  } @else { <div></div> }
+                  <small [class]="(formNuevo().descripcion?.length ?? 0) > 480 ? 'text-danger' : 'text-muted'">
+                    {{ formNuevo().descripcion?.length ?? 0 }}/500
+                  </small>
+                </div>
+              </div>
+              <!-- Precio -->
+              <div class="col-6">
+                <label class="form-label">Precio <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text">S/</span>
+                  <input type="number"
+                    [class]="'form-control' + (err('precio') ? ' is-invalid' : '')"
+                    min="0.01" max="99999.99" step="0.01"
+                    [ngModel]="formNuevo().precio"
+                    (ngModelChange)="patchNuevo('precio', +$event)"
+                    (blur)="tocar('precio')"
+                    name="precio" />
+                </div>
+                @if (err('precio')) {
+                  <div class="text-danger mt-1" style="font-size:0.8rem">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ err('precio') }}
+                  </div>
+                } @else {
+                  <small class="text-muted">Máx. S/ 99,999.99</small>
+                }
+              </div>
+              <!-- Cantidad -->
+              <div class="col-6">
+                <label class="form-label">Cantidad <span class="text-danger">*</span></label>
+                <input type="number"
+                  [class]="'form-control' + (err('cantidad') ? ' is-invalid' : '')"
+                  min="0" max="99999" step="1"
+                  [ngModel]="formNuevo().cantidad"
+                  (ngModelChange)="patchNuevo('cantidad', +$event)"
+                  (blur)="tocar('cantidad')"
+                  name="cantidad" />
+                @if (err('cantidad')) {
+                  <div class="invalid-feedback d-block" style="font-size:0.8rem">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ err('cantidad') }}
+                  </div>
+                } @else {
+                  <small class="text-muted">Máx. 99,999 unidades</small>
+                }
+              </div>
+              <!-- Categoría -->
+              <div class="col-12">
+                <label class="form-label">Categoría <span class="text-danger">*</span></label>
+                <select
+                  [class]="'form-select' + (err('idCategoria') ? ' is-invalid' : '')"
+                  [ngModel]="formNuevo().idCategoria"
+                  (ngModelChange)="patchNuevo('idCategoria', +$event)"
+                  (blur)="tocar('idCategoria')"
+                  name="idCat">
+                  <option [value]="0" disabled>Selecciona una categoría</option>
+                  @for (c of categorias(); track c.id) {
+                    <option [value]="c.id">{{ c.nombre }}</option>
+                  }
+                </select>
+                @if (err('idCategoria')) {
+                  <div class="invalid-feedback d-block" style="font-size:0.8rem">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ err('idCategoria') }}
+                  </div>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="row g-3">
+              <!-- Nombre -->
+              <div class="col-12">
+                <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                <input type="text"
+                  [class]="'form-control' + (err('nombre') ? ' is-invalid' : '')"
+                  maxlength="150"
+                  [ngModel]="formEdit().nombre"
+                  (ngModelChange)="patchEdit('nombre', $event)"
+                  (blur)="tocar('nombre')"
+                  name="nombre2" />
+                <div class="d-flex justify-content-between mt-1">
+                  @if (err('nombre')) {
+                    <div class="text-danger" style="font-size:0.8rem">
+                      <i class="bi bi-exclamation-circle me-1"></i>{{ err('nombre') }}
+                    </div>
+                  } @else { <div></div> }
+                  <small [class]="formEdit().nombre.length > 140 ? 'text-danger' : 'text-muted'">
+                    {{ formEdit().nombre.length }}/150
+                  </small>
+                </div>
+              </div>
+              <!-- Descripción -->
+              <div class="col-12">
+                <label class="form-label">Descripción</label>
+                <textarea
+                  [class]="'form-control' + (err('descripcion') ? ' is-invalid' : '')"
+                  rows="2"
+                  maxlength="500"
+                  [ngModel]="formEdit().descripcion"
+                  (ngModelChange)="patchEdit('descripcion', $event)"
+                  (blur)="tocar('descripcion')"
+                  name="desc2"></textarea>
+                <div class="d-flex justify-content-between mt-1">
+                  @if (err('descripcion')) {
+                    <div class="text-danger" style="font-size:0.8rem">
+                      <i class="bi bi-exclamation-circle me-1"></i>{{ err('descripcion') }}
+                    </div>
+                  } @else { <div></div> }
+                  <small [class]="(formEdit().descripcion?.length ?? 0) > 480 ? 'text-danger' : 'text-muted'">
+                    {{ formEdit().descripcion?.length ?? 0 }}/500
+                  </small>
+                </div>
+              </div>
+              <!-- Precio -->
+              <div class="col-6">
+                <label class="form-label">Precio <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text">S/</span>
+                  <input type="number"
+                    [class]="'form-control' + (err('precio') ? ' is-invalid' : '')"
+                    min="0.01" max="99999.99" step="0.01"
+                    [ngModel]="formEdit().precio"
+                    (ngModelChange)="patchEdit('precio', +$event)"
+                    (blur)="tocar('precio')"
+                    name="precio2" />
+                </div>
+                @if (err('precio')) {
+                  <div class="text-danger mt-1" style="font-size:0.8rem">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ err('precio') }}
+                  </div>
+                } @else {
+                  <small class="text-muted">Máx. S/ 99,999.99</small>
+                }
+              </div>
+              <!-- Cantidad -->
+              <div class="col-6">
+                <label class="form-label">Cantidad <span class="text-danger">*</span></label>
+                <input type="number"
+                  [class]="'form-control' + (err('cantidad') ? ' is-invalid' : '')"
+                  min="0" max="99999" step="1"
+                  [ngModel]="formEdit().cantidad"
+                  (ngModelChange)="patchEdit('cantidad', +$event)"
+                  (blur)="tocar('cantidad')"
+                  name="cantidad2" />
+                @if (err('cantidad')) {
+                  <div class="invalid-feedback d-block" style="font-size:0.8rem">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ err('cantidad') }}
+                  </div>
+                } @else {
+                  <small class="text-muted">Máx. 99,999 unidades</small>
+                }
+              </div>
+              <!-- Categoría -->
+              <div class="col-12">
+                <label class="form-label">Categoría <span class="text-danger">*</span></label>
+                <select
+                  [class]="'form-select' + (err('idCategoria') ? ' is-invalid' : '')"
+                  [ngModel]="formEdit().idCategoria"
+                  (ngModelChange)="patchEdit('idCategoria', +$event)"
+                  (blur)="tocar('idCategoria')"
+                  name="idCat2">
+                  @for (c of categorias(); track c.id) {
+                    <option [value]="c.id">{{ c.nombre }}</option>
+                  }
+                </select>
+                @if (err('idCategoria')) {
+                  <div class="invalid-feedback d-block" style="font-size:0.8rem">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ err('idCategoria') }}
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="modalAbierto.set(false)">Cancelar</button>
+          <button type="button" class="btn btn-primary btn-sm" (click)="guardar()" [disabled]="!formValido()">
+            <i class="bi bi-check2 me-1"></i>Guardar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

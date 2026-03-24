@@ -1,0 +1,223 @@
+<!-- Header -->
+<div class="card-header-custom">
+  <div>
+    <h5 class="fw-bold mb-0" style="color:#1e2a3b">Usuarios</h5>
+    <small class="text-muted">{{ usuariosFiltrados().length }} de {{ usuarios().length }} usuarios</small>
+  </div>
+  <button (click)="abrirNuevo()" class="btn btn-primary btn-sm d-flex align-items-center gap-2">
+    <i class="bi bi-person-plus"></i> Nuevo usuario
+  </button>
+</div>
+
+<div class="search-box mb-3">
+  <i class="bi bi-search"></i>
+  <input type="text" class="form-control" placeholder="Buscar por nombre o correo..."
+    [ngModel]="busqueda()" (ngModelChange)="setBusqueda($event)" name="busqueda" />
+</div>
+
+@if (error()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-3" style="font-size:0.85rem">
+    <i class="bi bi-exclamation-circle-fill"></i>{{ error() }}
+  </div>
+}
+
+<div class="table-card">
+  @if (cargando()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" style="width:2rem;height:2rem"></div>
+      <p class="text-muted mt-2 mb-0" style="font-size:0.875rem">Cargando usuarios...</p>
+    </div>
+  } @else if (usuarios().length === 0) {
+    <div class="empty-state">
+      <i class="bi bi-people"></i>
+      <p>No hay usuarios registrados.</p>
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th>Usuario</th>
+            <th class="d-none d-sm-table-cell">Correo</th>
+            <th class="d-none d-md-table-cell text-center">Rol</th>
+            <th class="text-center">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of usuariosPag(); track u.id; let i = $index) {
+            @let offset = (paginaActual() - 1) * porPagina;
+            <tr>
+              <td class="text-muted" style="font-size:0.85rem">{{ offset + i + 1 }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div style="width:34px;height:34px;background:#eef2ff;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                    <span style="font-weight:700;color:#3b6cf8;font-size:0.8rem">
+                      {{ u.nombres.charAt(0) }}{{ u.apellidos.charAt(0) }}
+                    </span>
+                  </div>
+                  <div>
+                    <div class="fw-semibold" style="color:#1e2a3b;font-size:0.875rem">{{ u.nombres }} {{ u.apellidos }}</div>
+                    <div class="text-muted d-sm-none" style="font-size:0.75rem">{{ u.correo }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="d-none d-sm-table-cell text-muted" style="font-size:0.875rem">{{ u.correo }}</td>
+              <td class="d-none d-md-table-cell text-center">
+                <span [class]="u.rol === 'ADMINISTRADOR' ? 'badge-admin' : 'badge-usuario'">{{ u.rol }}</span>
+              </td>
+              <td class="text-center">
+                <button
+                  (click)="cambiarEstado(u.id, u.estado)"
+                  class="btn btn-sm"
+                  style="font-size:0.72rem;font-weight:600;padding:0.25rem 0.7rem;border-radius:2rem"
+                  [class]="u.estado === 'ACTIVO' ? 'badge-activo border-0' : 'badge-inactivo border-0'"
+                  title="Clic para cambiar estado"
+                >
+                  {{ u.estado }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (totalPaginas() > 1) {
+      <div class="paginacion">
+        <span>Mostrando {{ (paginaActual()-1)*porPagina+1 }}–{{ paginaActual()*porPagina < usuariosFiltrados().length ? paginaActual()*porPagina : usuariosFiltrados().length }} de {{ usuariosFiltrados().length }}</span>
+        <div class="d-flex gap-1">
+          <button class="page-btn" (click)="irAPagina(paginaActual()-1)" [disabled]="paginaActual()===1">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          @for (p of paginas(); track p) {
+            <button class="page-btn" [class.active]="p===paginaActual()" (click)="irAPagina(p)">{{ p }}</button>
+          }
+          <button class="page-btn" (click)="irAPagina(paginaActual()+1)" [disabled]="paginaActual()===totalPaginas()">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<!-- Modal -->
+@if (modalAbierto()) {
+  <div class="modal d-block" tabindex="-1" style="background:rgba(0,0,0,0.45)">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Nuevo usuario</h5>
+          <button type="button" class="btn-close" (click)="modalAbierto.set(false)"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <!-- Nombres -->
+            <div class="col-6">
+              <label class="form-label">Nombres <span class="text-danger">*</span></label>
+              <input type="text"
+                [class]="'form-control' + (err('nombres') ? ' is-invalid' : '')"
+                placeholder="Juan" maxlength="100"
+                [ngModel]="form().nombres"
+                (ngModelChange)="patchForm('nombres', $event)"
+                (blur)="tocar('nombres')"
+                name="nombres" />
+              <div class="d-flex justify-content-between mt-1">
+                @if (err('nombres')) {
+                  <div class="text-danger" style="font-size:0.8rem">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ err('nombres') }}
+                  </div>
+                } @else { <div></div> }
+                <small [class]="form().nombres.length > 90 ? 'text-danger' : 'text-muted'">
+                  {{ form().nombres.length }}/100
+                </small>
+              </div>
+            </div>
+            <!-- Apellidos -->
+            <div class="col-6">
+              <label class="form-label">Apellidos <span class="text-danger">*</span></label>
+              <input type="text"
+                [class]="'form-control' + (err('apellidos') ? ' is-invalid' : '')"
+                placeholder="Pérez" maxlength="100"
+                [ngModel]="form().apellidos"
+                (ngModelChange)="patchForm('apellidos', $event)"
+                (blur)="tocar('apellidos')"
+                name="apellidos" />
+              <div class="d-flex justify-content-between mt-1">
+                @if (err('apellidos')) {
+                  <div class="text-danger" style="font-size:0.8rem">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ err('apellidos') }}
+                  </div>
+                } @else { <div></div> }
+                <small [class]="form().apellidos.length > 90 ? 'text-danger' : 'text-muted'">
+                  {{ form().apellidos.length }}/100
+                </small>
+              </div>
+            </div>
+            <!-- Correo -->
+            <div class="col-12">
+              <label class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+              <input type="email"
+                [class]="'form-control' + (err('correo') ? ' is-invalid' : '')"
+                placeholder="correo@empresa.com" maxlength="150"
+                [ngModel]="form().correo"
+                (ngModelChange)="patchForm('correo', $event)"
+                (blur)="tocar('correo')"
+                name="correo" />
+              <div class="d-flex justify-content-between mt-1">
+                @if (err('correo')) {
+                  <div class="text-danger" style="font-size:0.8rem">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ err('correo') }}
+                  </div>
+                } @else { <div></div> }
+                <small [class]="form().correo.length > 140 ? 'text-danger' : 'text-muted'">
+                  {{ form().correo.length }}/150
+                </small>
+              </div>
+            </div>
+            <!-- Contraseña -->
+            <div class="col-12">
+              <label class="form-label">Contraseña <span class="text-danger">*</span></label>
+              <input type="password"
+                [class]="'form-control' + (err('contrasena') ? ' is-invalid' : '')"
+                placeholder="Mín. 8 caracteres" maxlength="50"
+                [ngModel]="form().contrasena"
+                (ngModelChange)="patchForm('contrasena', $event)"
+                (blur)="tocar('contrasena')"
+                name="contrasena" />
+              <div class="d-flex justify-content-between mt-1">
+                @if (err('contrasena')) {
+                  <div class="text-danger" style="font-size:0.8rem">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ err('contrasena') }}
+                  </div>
+                } @else {
+                  <small class="text-muted">Entre 8 y 50 caracteres</small>
+                }
+                <small [class]="form().contrasena.length > 45 ? 'text-danger' : 'text-muted'">
+                  {{ form().contrasena.length }}/50
+                </small>
+              </div>
+            </div>
+            <!-- Rol -->
+            <div class="col-12">
+              <label class="form-label">Rol</label>
+              <select class="form-select"
+                [ngModel]="form().rol"
+                (ngModelChange)="patchForm('rol', $event)"
+                name="rol">
+                <option value="EMPLEADO">EMPLEADO</option>
+                <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="modalAbierto.set(false)">Cancelar</button>
+          <button type="button" class="btn btn-primary btn-sm" (click)="guardar()" [disabled]="!formValido()">
+            <i class="bi bi-check2 me-1"></i>Crear usuario
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

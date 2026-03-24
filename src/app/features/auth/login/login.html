@@ -1,0 +1,79 @@
+<div class="login-wrapper">
+  <div class="login-card">
+
+    <!-- Logo -->
+    <div class="login-logo">
+      <i class="bi bi-boxes"></i>
+    </div>
+
+    <div class="text-center mb-4">
+      <h4 class="fw-bold mb-1" style="color:#1e2a3b">Sistema de Inventario</h4>
+      <p class="text-muted" style="font-size:0.85rem">Ingresa tus credenciales para continuar</p>
+    </div>
+
+    @if (error()) {
+      <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-3" style="font-size:0.85rem">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        {{ error() }}
+      </div>
+    }
+
+    <form (ngSubmit)="login()" #f="ngForm">
+      <div class="mb-3">
+        <label class="form-label">Correo electrónico</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0" style="border-radius:0.5rem 0 0 0.5rem">
+            <i class="bi bi-envelope text-muted" style="font-size:0.875rem"></i>
+          </span>
+          <input
+            type="email"
+            class="form-control border-start-0"
+            style="border-radius:0 0.5rem 0.5rem 0"
+            placeholder="correo@empresa.com"
+            [ngModel]="correo()"
+            (ngModelChange)="correo.set($event)"
+            name="correo"
+            required
+            autocomplete="email"
+          />
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label">Contraseña</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0" style="border-radius:0.5rem 0 0 0.5rem">
+            <i class="bi bi-lock text-muted" style="font-size:0.875rem"></i>
+          </span>
+          <input
+            type="password"
+            class="form-control border-start-0"
+            style="border-radius:0 0.5rem 0.5rem 0"
+            placeholder="••••••••"
+            [ngModel]="contrasena()"
+            (ngModelChange)="contrasena.set($event)"
+            name="contrasena"
+            required
+            autocomplete="current-password"
+          />
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary w-100 py-2"
+        [disabled]="cargando()"
+      >
+        @if (cargando()) {
+          <span class="spinner-border spinner-border-sm me-2"></span>Ingresando...
+        } @else {
+          <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar
+        }
+      </button>
+    </form>
+
+    <p class="text-center text-muted mt-4 mb-0" style="font-size:0.75rem">
+      © {{ year }} Inventario — Todos los derechos reservados
+    </p>
+  </div>
+</div>

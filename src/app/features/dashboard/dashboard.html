@@ -1,0 +1,106 @@
+<div class="mb-4">
+  <h6 class="text-muted fw-semibold mb-1" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em">Resumen general</h6>
+  <p class="text-muted mb-0" style="font-size:0.875rem">Vista consolidada del estado actual del inventario.</p>
+</div>
+
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="bi bi-box-seam-fill"></i></div>
+      <div>
+        <div class="stat-label">Productos</div>
+        @if (cargando()) {
+          <div class="placeholder-glow"><span class="placeholder col-4"></span></div>
+        } @else {
+          <div class="stat-value">{{ stats().totalProductos }}</div>
+        }
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="bi bi-tags-fill"></i></div>
+      <div>
+        <div class="stat-label">Categorías</div>
+        @if (cargando()) {
+          <div class="placeholder-glow"><span class="placeholder col-4"></span></div>
+        } @else {
+          <div class="stat-value">{{ stats().totalCategorias }}</div>
+        }
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon purple"><i class="bi bi-people-fill"></i></div>
+      <div>
+        <div class="stat-label">Usuarios</div>
+        @if (cargando()) {
+          <div class="placeholder-glow"><span class="placeholder col-4"></span></div>
+        } @else {
+          <div class="stat-value">{{ stats().totalUsuarios }}</div>
+        }
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon amber"><i class="bi bi-currency-dollar"></i></div>
+      <div>
+        <div class="stat-label">Valor inventario</div>
+        @if (cargando()) {
+          <div class="placeholder-glow"><span class="placeholder col-6"></span></div>
+        } @else {
+          <div class="stat-value" style="font-size:1.3rem">{{ stats().valorInventario | number:'1.2-2' }}</div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick actions -->
+<div class="mb-3">
+  <h6 class="text-muted fw-semibold mb-3" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em">Acceso rápido</h6>
+  <div class="row g-3">
+    <div class="col-12 col-sm-6 col-md-4">
+      <a routerLink="/productos" class="text-decoration-none">
+        <div class="card h-100 p-3" style="cursor:pointer;transition:box-shadow 0.15s" onmouseover="this.style.boxShadow='0 4px 16px rgba(59,108,248,0.15)'" onmouseout="this.style.boxShadow=''">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon blue" style="width:40px;height:40px;font-size:1rem"><i class="bi bi-box-seam"></i></div>
+            <div>
+              <div style="font-weight:600;color:#1e2a3b;font-size:0.9rem">Gestionar productos</div>
+              <div class="text-muted" style="font-size:0.78rem">Agregar, editar y eliminar</div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-12 col-sm-6 col-md-4">
+      <a routerLink="/categorias" class="text-decoration-none">
+        <div class="card h-100 p-3" style="cursor:pointer;transition:box-shadow 0.15s" onmouseover="this.style.boxShadow='0 4px 16px rgba(16,185,129,0.15)'" onmouseout="this.style.boxShadow=''">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon green" style="width:40px;height:40px;font-size:1rem"><i class="bi bi-tag"></i></div>
+            <div>
+              <div style="font-weight:600;color:#1e2a3b;font-size:0.9rem">Gestionar categorías</div>
+              <div class="text-muted" style="font-size:0.78rem">Organiza tu catálogo</div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-12 col-sm-6 col-md-4">
+      <a routerLink="/reportes" class="text-decoration-none">
+        <div class="card h-100 p-3" style="cursor:pointer;transition:box-shadow 0.15s" onmouseover="this.style.boxShadow='0 4px 16px rgba(245,158,11,0.15)'" onmouseout="this.style.boxShadow=''">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon amber" style="width:40px;height:40px;font-size:1rem"><i class="bi bi-bar-chart-line"></i></div>
+            <div>
+              <div style="font-weight:600;color:#1e2a3b;font-size:0.9rem">Ver reportes</div>
+              <div class="text-muted" style="font-size:0.78rem">Stock y valor por categoría</div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>

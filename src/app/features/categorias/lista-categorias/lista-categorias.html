@@ -1,0 +1,151 @@
+<!-- Header -->
+<div class="card-header-custom">
+  <div>
+    <h5 class="fw-bold mb-0" style="color:#1e2a3b">Categorías</h5>
+    <small class="text-muted">{{ categoriasFiltradas().length }} de {{ categorias().length }} categorías</small>
+  </div>
+  <button (click)="abrirNuevo()" class="btn btn-primary btn-sm d-flex align-items-center gap-2">
+    <i class="bi bi-plus-lg"></i> Nueva categoría
+  </button>
+</div>
+
+<div class="search-box mb-3">
+  <i class="bi bi-search"></i>
+  <input type="text" class="form-control" placeholder="Buscar por nombre..."
+    [ngModel]="busqueda()" (ngModelChange)="setBusqueda($event)" name="busqueda" />
+</div>
+
+@if (error()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-3" style="font-size:0.85rem">
+    <i class="bi bi-exclamation-circle-fill"></i>{{ error() }}
+  </div>
+}
+
+<div class="table-card">
+  @if (cargando()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" style="width:2rem;height:2rem"></div>
+      <p class="text-muted mt-2 mb-0" style="font-size:0.875rem">Cargando categorías...</p>
+    </div>
+  } @else if (categoriasFiltradas().length === 0) {
+    <div class="empty-state">
+      <i class="bi bi-tag"></i>
+      <p>No se encontraron categorías.</p>
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th class="d-none d-sm-table-cell">Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of categoriasPag(); track c.id; let i = $index) {
+            @let offset = (paginaActual() - 1) * porPagina;
+            <tr>
+              <td class="text-muted" style="width:48px">{{ offset + i + 1 }}</td>
+              <td class="fw-semibold" style="color:#1e2a3b">{{ c.nombre }}</td>
+              <td class="d-none d-sm-table-cell">
+                <button
+                  (click)="eliminar(c.id)"
+                  class="btn btn-sm"
+                  style="font-size:0.72rem;font-weight:600;padding:0.25rem 0.7rem;border-radius:2rem"
+                  [class]="c.estado === 'ACTIVO' ? 'badge-activo border-0' : 'badge-inactivo border-0'"
+                  title="Clic para cambiar estado">
+                  {{ c.estado }}
+                </button>
+              </td>
+              <td class="text-center">
+                <button (click)="abrirEdicion(c)" class="btn btn-sm btn-outline-secondary" title="Editar"
+                  style="padding:0.25rem 0.5rem">
+                  <i class="bi bi-pencil"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (totalPaginas() > 1) {
+      <div class="paginacion">
+        <span>Mostrando {{ (paginaActual()-1)*porPagina+1 }}–{{ paginaActual()*porPagina < categoriasFiltradas().length ? paginaActual()*porPagina : categoriasFiltradas().length }} de {{ categoriasFiltradas().length }}</span>
+        <div class="d-flex gap-1">
+          <button class="page-btn" (click)="irAPagina(paginaActual()-1)" [disabled]="paginaActual()===1">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          @for (p of paginas(); track p) {
+            <button class="page-btn" [class.active]="p===paginaActual()" (click)="irAPagina(p)">{{ p }}</button>
+          }
+          <button class="page-btn" (click)="irAPagina(paginaActual()+1)" [disabled]="paginaActual()===totalPaginas()">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<!-- Modal -->
+@if (modalAbierto()) {
+  <div class="modal d-block" tabindex="-1" style="background:rgba(0,0,0,0.45)">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">{{ modoEdicion() ? 'Editar categoría' : 'Nueva categoría' }}</h5>
+          <button type="button" class="btn-close" (click)="modalAbierto.set(false)"></button>
+        </div>
+        <div class="modal-body">
+          <label class="form-label">Nombre <span class="text-danger">*</span></label>
+          @if (!modoEdicion()) {
+            <input type="text"
+              [class]="'form-control' + (mostrarError('nombre') && errNombre() ? ' is-invalid' : '')"
+              placeholder="Ej: Electrónica"
+              maxlength="100"
+              [ngModel]="form().nombre"
+              (ngModelChange)="form.update(f => ({...f, nombre: $event})); tocar('nombre')"
+              (blur)="tocar('nombre')"
+              name="nombre" />
+            <div class="d-flex justify-content-between mt-1">
+              @if (mostrarError('nombre') && errNombre()) {
+                <div class="text-danger" style="font-size:0.8rem">
+                  <i class="bi bi-exclamation-circle me-1"></i>{{ errNombre() }}
+                </div>
+              } @else { <div></div> }
+              <small [class]="form().nombre.length > 90 ? 'text-danger' : 'text-muted'">
+                {{ form().nombre.length }}/100
+              </small>
+            </div>
+          } @else {
+            <input type="text"
+              [class]="'form-control' + (mostrarError('nombre') && errNombre() ? ' is-invalid' : '')"
+              maxlength="100"
+              [ngModel]="nombreEdit()"
+              (ngModelChange)="nombreEdit.set($event); tocar('nombre')"
+              (blur)="tocar('nombre')"
+              name="nombreEdit" />
+            <div class="d-flex justify-content-between mt-1">
+              @if (mostrarError('nombre') && errNombre()) {
+                <div class="text-danger" style="font-size:0.8rem">
+                  <i class="bi bi-exclamation-circle me-1"></i>{{ errNombre() }}
+                </div>
+              } @else { <div></div> }
+              <small [class]="nombreEdit().length > 90 ? 'text-danger' : 'text-muted'">
+                {{ nombreEdit().length }}/100
+              </small>
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="modalAbierto.set(false)">Cancelar</button>
+          <button type="button" class="btn btn-primary btn-sm" (click)="guardar()" [disabled]="!formValido()">
+            <i class="bi bi-check2 me-1"></i>Guardar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

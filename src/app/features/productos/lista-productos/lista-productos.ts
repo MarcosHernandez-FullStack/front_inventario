@@ -10,15 +10,6 @@ import { ToastService } from '../../../core/services/toast.service';
 import { FormProductoComponent, ProductoFormData } from '../form-producto/form-producto';
 import { environment } from '../../../../environments/environment';
 
-const MOCK_PRODUCTOS: Producto[] = [
-  { id: 1, nombre: 'Laptop HP 15"',    descripcion: 'Intel Core i5, 8GB RAM, 512GB SSD', precio: 2899.90, cantidad: 12, idCategoria: 1, nombreCategoria: 'Computadoras',    estado: 'ACTIVO'   },
-  { id: 2, nombre: 'Monitor LG 27"',   descripcion: 'Full HD IPS, 75Hz',                 precio: 749.00,  cantidad: 8,  idCategoria: 2, nombreCategoria: 'Monitores',       estado: 'ACTIVO'   },
-  { id: 3, nombre: 'Teclado Mecánico', descripcion: 'Switch Blue, retroiluminado',        precio: 189.90,  cantidad: 3,  idCategoria: 3, nombreCategoria: 'Periféricos',     estado: 'ACTIVO'   },
-  { id: 4, nombre: 'Mouse Logitech MX',descripcion: 'Inalámbrico, ergonómico',            precio: 229.00,  cantidad: 20, idCategoria: 3, nombreCategoria: 'Periféricos',     estado: 'ACTIVO'   },
-  { id: 5, nombre: 'Disco SSD 1TB',    descripcion: 'Samsung 870 EVO SATA',               precio: 399.00,  cantidad: 5,  idCategoria: 4, nombreCategoria: 'Almacenamiento',  estado: 'ACTIVO'   },
-  { id: 6, nombre: 'Auriculares Sony', descripcion: 'Noise Cancelling WH-1000XM5',        precio: 899.00,  cantidad: 2,  idCategoria: 5, nombreCategoria: 'Audio',           estado: 'INACTIVO' },
-];
-
 @Component({
   selector: 'app-lista-productos',
   standalone: true,
@@ -70,13 +61,7 @@ export class ListaProductosComponent implements OnInit {
     this.cargar();
     this.http.get<Categoria[]>(`${environment.apiUrl}/categorias`).subscribe({
       next: data => this.categorias.set(data.filter(c => c.estado === 'ACTIVO')),
-      error: () => this.categorias.set([
-        { id: 1, nombre: 'Computadoras',   estado: 'ACTIVO' },
-        { id: 2, nombre: 'Monitores',      estado: 'ACTIVO' },
-        { id: 3, nombre: 'Periféricos',    estado: 'ACTIVO' },
-        { id: 4, nombre: 'Almacenamiento', estado: 'ACTIVO' },
-        { id: 5, nombre: 'Audio',          estado: 'ACTIVO' },
-      ]),
+      error: () => this.error.set('No se pudieron cargar las categorías.'),
     });
   }
 
@@ -84,7 +69,7 @@ export class ListaProductosComponent implements OnInit {
     this.cargando.set(true);
     this.http.get<Producto[]>(this.api).subscribe({
       next: data => { this.productos.set(data); this.cargando.set(false); },
-      error: ()   => { this.productos.set(MOCK_PRODUCTOS); this.cargando.set(false); },
+      error: ()   => { this.error.set('No se pudieron cargar los productos.'); this.cargando.set(false); },
     });
   }
 

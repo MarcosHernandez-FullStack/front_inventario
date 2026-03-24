@@ -8,14 +8,6 @@ import { ToastService } from '../../../core/services/toast.service';
 import { FormCategoriaComponent } from '../form-categoria/form-categoria';
 import { environment } from '../../../../environments/environment';
 
-const MOCK_CATEGORIAS: Categoria[] = [
-  { id: 1, nombre: 'Computadoras',   estado: 'ACTIVO'   },
-  { id: 2, nombre: 'Monitores',      estado: 'ACTIVO'   },
-  { id: 3, nombre: 'Periféricos',    estado: 'ACTIVO'   },
-  { id: 4, nombre: 'Almacenamiento', estado: 'ACTIVO'   },
-  { id: 5, nombre: 'Audio',          estado: 'INACTIVO' },
-];
-
 @Component({
   selector: 'app-lista-categorias',
   standalone: true,
@@ -64,7 +56,7 @@ export class ListaCategoriasComponent implements OnInit {
     this.cargando.set(true);
     this.http.get<Categoria[]>(this.api).subscribe({
       next: data => { this.categorias.set(data); this.cargando.set(false); },
-      error: ()   => { this.categorias.set(MOCK_CATEGORIAS); this.cargando.set(false); },
+      error: ()   => { this.error.set('No se pudieron cargar las categorías.'); this.cargando.set(false); },
     });
   }
 

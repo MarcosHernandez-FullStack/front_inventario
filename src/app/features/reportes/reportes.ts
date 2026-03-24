@@ -7,20 +7,6 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { environment } from '../../../environments/environment';
 
-const MOCK_REPORTE = [
-  { categoria: 'Computadoras',   totalProductos: 3, stockTotal: 25, valorTotal: 12450.50 },
-  { categoria: 'Monitores',      totalProductos: 2, stockTotal: 18, valorTotal: 4320.00  },
-  { categoria: 'Periféricos',    totalProductos: 5, stockTotal: 64, valorTotal: 2890.30  },
-  { categoria: 'Almacenamiento', totalProductos: 4, stockTotal: 30, valorTotal: 5100.00  },
-  { categoria: 'Audio',          totalProductos: 2, stockTotal: 9,  valorTotal: 1780.00  },
-];
-
-const MOCK_BAJO_STOCK = [
-  { id: 3, nombre: 'Teclado Mecánico',  descripcion: 'Switch Blue', precio: 189.90, cantidad: 3, idCategoria: 3, nombreCategoria: 'Periféricos',  estado: 'ACTIVO' },
-  { id: 6, nombre: 'Auriculares Sony',  descripcion: 'Noise Cancelling', precio: 899.00, cantidad: 4, idCategoria: 5, nombreCategoria: 'Audio', estado: 'ACTIVO' },
-  { id: 5, nombre: 'Disco SSD 1TB',     descripcion: 'Samsung 870 EVO',  precio: 399.00, cantidad: 5, idCategoria: 4, nombreCategoria: 'Almacenamiento', estado: 'ACTIVO' },
-];
-
 interface ReporteItem {
   categoria:      string;
   totalProductos: number;
@@ -65,11 +51,11 @@ export class ReportesComponent implements OnInit {
     this.cargando.set(true);
     this.http.get<ReporteItem[]>(`${this.api}/stock-por-categoria`).subscribe({
       next: data => { this.datos.set(data); this.cargando.set(false); },
-      error: ()   => { this.datos.set(MOCK_REPORTE); this.cargando.set(false); },
+      error: ()   => { this.error.set('No se pudieron cargar los datos del reporte.'); this.cargando.set(false); },
     });
     this.http.get<ProductoBajoStock[]>(`${this.api}/bajo-stock`).subscribe({
       next: data => this.bajoStock.set(data),
-      error: ()  => this.bajoStock.set(MOCK_BAJO_STOCK),
+      error: ()  => this.error.set('No se pudieron cargar los productos con bajo stock.'),
     });
   }
 

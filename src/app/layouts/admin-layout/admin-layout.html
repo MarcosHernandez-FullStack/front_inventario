@@ -18,7 +18,7 @@
   </div>
 
   <nav class="sidebar-nav">
-    <div class="nav-label">Principal</div>
+    <!-- <div class="nav-label">Principal</div> -->
     @if (esAdmin) {
       <a routerLink="/dashboard" routerLinkActive="active" class="sidebar-link" (click)="cerrarSidebar()">
         <i class="bi bi-speedometer2"></i> Dashboard
@@ -36,7 +36,7 @@
       }
     </a>
     @if (esAdmin) {
-      <div class="nav-label">Administración</div>
+      <!-- <div class="nav-label">Administración</div> -->
       <a routerLink="/categorias" routerLinkActive="active" class="sidebar-link" (click)="cerrarSidebar()">
         <i class="bi bi-tag"></i> Categorías
       </a>

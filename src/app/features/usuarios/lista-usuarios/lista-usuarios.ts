@@ -8,13 +8,6 @@ import { ToastService } from '../../../core/services/toast.service';
 import { FormUsuarioComponent } from '../form-usuario/form-usuario';
 import { environment } from '../../../../environments/environment';
 
-const MOCK_USUARIOS: Usuario[] = [
-  { id: 1, nombres: 'Carlos', apellidos: 'Mendoza', celular: '987654321', correo: 'carlos@empresa.com', rol: 'ADMINISTRADOR', estado: 'ACTIVO'   },
-  { id: 2, nombres: 'Ana',    apellidos: 'Torres',  celular: '912345678', correo: 'ana@empresa.com',    rol: 'EMPLEADO',      estado: 'ACTIVO'   },
-  { id: 3, nombres: 'Luis',   apellidos: 'Quispe',  celular: '',          correo: 'luis@empresa.com',   rol: 'EMPLEADO',      estado: 'ACTIVO'   },
-  { id: 4, nombres: 'Sofía',  apellidos: 'Ramírez', celular: '945123456', correo: 'sofia@empresa.com',  rol: 'EMPLEADO',      estado: 'INACTIVO' },
-];
-
 @Component({
   selector: 'app-lista-usuarios',
   standalone: true,
@@ -64,7 +57,7 @@ export class ListaUsuariosComponent implements OnInit {
     this.cargando.set(true);
     this.http.get<Usuario[]>(this.api).subscribe({
       next: data => { this.usuarios.set(data); this.cargando.set(false); },
-      error: ()   => { this.usuarios.set(MOCK_USUARIOS); this.cargando.set(false); },
+      error: ()   => { this.error.set('No se pudieron cargar los usuarios.'); this.cargando.set(false); },
     });
   }
 

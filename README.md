@@ -2,7 +2,7 @@
 
 Frontend del sistema de gestión de inventario. Desarrollado con **Angular 21**, consume la API REST del backend y se comunica en tiempo real mediante SignalR.
 
-> **Repositorio backend:** [back_inventario](https://github.com/tu-usuario/back_inventario)
+> **Repositorio backend:** [back_inventario](https://github.com/MarcosHernandez-FullStack/back_inventario)
 
 ---
 
@@ -35,7 +35,7 @@ npm install -g @angular/cli
 
 Esta aplicación **requiere que el backend esté corriendo** antes de iniciarla.
 
-Sigue las instrucciones de [back_inventario](https://github.com/tu-usuario/back_inventario) para levantar la API en `http://localhost:5000`.
+Sigue las instrucciones de [back_inventario](https://github.com/MarcosHernandez-FullStack/back_inventario) para levantar la API en `http://localhost:5000`.
 
 ---
 

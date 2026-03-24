@@ -15,7 +15,7 @@ export interface CrearProducto {
   precio:      number;
   cantidad:    number;
   idCategoria: number;
-  creadoPor:   string;
+  creadoPor:   number;
 }
 
 export interface ActualizarProducto {
@@ -24,5 +24,5 @@ export interface ActualizarProducto {
   precio:        number;
   cantidad:      number;
   idCategoria:   number;
-  actualizadoPor: string;
+  actualizadoPor: number;
 }

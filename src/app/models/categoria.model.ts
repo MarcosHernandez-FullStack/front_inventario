@@ -6,5 +6,5 @@ export interface Categoria {
 
 export interface CrearCategoria {
   nombre:    string;
-  creadoPor: string;
+  creadoPor: number;
 }

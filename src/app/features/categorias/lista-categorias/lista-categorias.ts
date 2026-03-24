@@ -56,7 +56,7 @@ export class ListaCategoriasComponent implements OnInit {
   setBusqueda(v: string) { this.busqueda.set(v); this.paginaActual.set(1); }
   irAPagina(n: number)   { this.paginaActual.set(n); }
 
-  private get usuarioActual() { return this.authSvc.session()?.correo ?? ''; }
+  private get usuarioActual() { return this.authSvc.id ?? 0; }
 
   ngOnInit() { this.cargar(); }
 

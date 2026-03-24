@@ -15,5 +15,5 @@ export interface CrearUsuario {
   correo:     string;
   contrasena: string;
   rol:        string;
-  creadoPor:  string;
+  creadoPor:  number;
 }

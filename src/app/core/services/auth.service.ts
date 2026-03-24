@@ -33,6 +33,10 @@ export class AuthService {
     return this.session()?.token ?? null;
   }
 
+  get id(): number | null {
+    return this.session()?.id ?? null;
+  }
+
   get rol(): string | null {
     return this.session()?.rol ?? null;
   }

@@ -21,6 +21,7 @@ interface ProductoBajoStock {
   precio:          number;
   cantidad:        number;
   nombreCategoria: string;
+  fechaCreacion?:  string | null;
 }
 
 @Component({
@@ -75,6 +76,35 @@ export class ReportesComponent implements OnInit {
       });
   }
 
+  formatearFecha(fechaStr: string | null | undefined): string {
+    if (!fechaStr) return '';
+    const fecha  = new Date(fechaStr);
+    if (isNaN(fecha.getTime()) || fecha.getFullYear() < 2000) return '';
+    const ahora  = new Date();
+    const diffMs = ahora.getTime() - fecha.getTime();
+    const diffMin  = Math.floor(diffMs / 60_000);
+    const diffHrs  = Math.floor(diffMin / 60);
+    const diffDias = Math.floor(diffHrs / 24);
+    const diffSem  = Math.floor(diffDias / 7);
+    const diffMes  = Math.floor(diffDias / 30);
+    const diffAnos = Math.floor(diffDias / 365);
+
+    const rtf = new Intl.RelativeTimeFormat('es', { numeric: 'always' });
+    let relativo: string;
+    if      (diffAnos  >= 1) relativo = rtf.format(-diffAnos,  'year');
+    else if (diffMes   >= 1) relativo = rtf.format(-diffMes,   'month');
+    else if (diffSem   >= 1) relativo = rtf.format(-diffSem,   'week');
+    else if (diffDias  >= 1) relativo = rtf.format(-diffDias,  'day');
+    else if (diffHrs   >= 1) relativo = rtf.format(-diffHrs,   'hour');
+    else if (diffMin   >= 1) relativo = rtf.format(-diffMin,   'minute');
+    else                     relativo = 'hace un momento';
+
+    const absoluta = fecha.toLocaleDateString('es-ES', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    });
+    return `${absoluta} - ${relativo}`;
+  }
+
   get totalProductos() { return this.datos().reduce((s, r) => s + r.totalProductos, 0); }
   get stockTotal()     { return this.datos().reduce((s, r) => s + r.stockTotal, 0); }
   get valorTotal()     { return this.datos().reduce((s, r) => s + r.valorTotal, 0); }
@@ -114,7 +144,7 @@ export class ReportesComponent implements OnInit {
     doc.text('Productos con Stock Bajo (<= 5 unidades)', 14, 44);
 
     const filas = this.bajoStock().map(p => [
-      p.nombre,
+      (() => { const f = this.formatearFecha(p.fechaCreacion); return f ? `${p.nombre}\n${f}` : p.nombre; })(),
       p.nombreCategoria,
       `S/ ${p.precio.toFixed(2)}`,
       { content: String(p.cantidad), styles: { textColor: [220, 53, 69] as [number,number,number], fontStyle: 'bold' as const } },

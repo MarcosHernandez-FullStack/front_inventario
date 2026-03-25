@@ -98,6 +98,11 @@
                 @if (p.descripcion) {
                   <div class="text-muted" style="font-size:0.75rem">{{ p.descripcion }}</div>
                 }
+                @if (formatearFecha(p.fechaCreacion); as fecha) {
+                  <div class="text-muted" style="font-size:0.72rem">
+                    <i class="bi bi-calendar3 me-1"></i>{{ fecha }}
+                  </div>
+                }
               </td>
               <td class="d-none d-md-table-cell text-muted" style="font-size:0.875rem">{{ p.nombreCategoria }}</td>
               <td class="text-end" style="font-size:0.875rem">S/ {{ p.precio | number:'1.2-2' }}</td>
